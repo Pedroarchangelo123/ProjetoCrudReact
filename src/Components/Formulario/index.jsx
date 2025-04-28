@@ -1,21 +1,59 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
+import { addProduto, updateProdutos } from '../../Service/ProdutoService'
+import "./formulario.css"; 
 
-function ProdutoForm() {
+function ProdutoForm({ selectedProduto, onSave }) {
     const [nome, setNome] = useState("");
     const [categoria, setCategoria] = useState("");
     const [preco, setPreco] = useState("");
 
+    useEffect(() => {
+        if (selectedProduto) {
+            setNome(selectedProduto.nome);
+            setCategoria(selectedProduto.categoria);
+            setPreco(selectedProduto.preco);
+        } else {
+            setNome("");
+            setCategoria("");
+            setPreco("");
+        }
+    }, [selectedProduto]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Add logic to handle form submission
-        console.log({ nome, categoria, preco });
+    
+        if (!nome || !categoria || !preco) {
+            alert("Preencha todos os campos");
+            return;
+        }
+    
+        const produtoData = {
+            id: selectedProduto?.id, // garante que o ID vá junto se for edição
+            nome,
+            categoria,
+            preco,
+        };
+    
+        if (selectedProduto) {
+            updateProdutos(produtoData);
+            alert("Produto atualizado!");
+        } else {
+            addProduto(produtoData);
+            alert("Produto adicionado!");
+        }
+    
+        setNome("");
+        setCategoria("");
+        setPreco("");
+        onSave();
     };
+    
 
     return (
         <Form onSubmit={handleSubmit}>
             <Form.Group>
-                <Form.Control
+                <Form.Control   
                     type="text"
                     placeholder="Digite o nome do produto"
                     value={nome}
@@ -35,7 +73,7 @@ function ProdutoForm() {
                 />
             </Form.Group>
             <Button variant="primary" type="submit">
-                Salvar Produto
+                {selectedProduto ? 'Atualizar Produto' : 'Salvar Produto'}
             </Button>
         </Form>
     );
